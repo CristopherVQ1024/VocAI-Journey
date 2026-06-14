@@ -1,0 +1,104 @@
+<div class="carrera-detalle-container">
+    <!-- Header con gradiente dinámico -->
+    <div class="carrera-header"
+        [style.background]="'linear-gradient(135deg, #1e293b 0%, ' + (carreraDetalle?.color_hex || '#6366f1') + ' 50%, #06b6d4 100%)'">
+        <button class="back-btn" (click)="volver()">
+            <span class="back-icon">←</span>
+            Volver a resultados
+        </button>
+
+        <div class="header-content">
+            <span class="carrera-badge">{{ carreraDetalle?.faculty?.nombre || 'Ingeniería' }}</span>
+            <h1 class="carrera-titulo">{{ carreraDetalle?.nombre || carreraNombre }}</h1>
+            <p class="carrera-subtitulo">
+                {{ carreraDetalle?.descripcion_corta || 'Descubre todo sobre esta carrera y cómo puede impulsar tu
+                futuro profesional' }}
+            </p>
+        </div>
+
+        <!-- Onda decorativa -->
+        <div class="wave-decoration">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+                <path d="M0,60 C360,120 720,0 1440,60 L1440,120 L0,120 Z" fill="white" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="carrera-content">
+
+        <!-- Cargando -->
+        <ng-container *ngIf="cargando">
+            <div class="loading-section">
+                <div class="spinner-large"></div>
+                <p>Cargando información de la carrera...</p>
+            </div>
+        </ng-container>
+
+        <!-- Datos de la carrera -->
+        <ng-container *ngIf="!cargando && carreraDetalle">
+
+            <!-- Cards de info rápida -->
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-icon">🎓</div>
+                    <div class="info-label">Modalidad</div>
+                    <div class="info-value">{{ carreraDetalle.modalidad | titlecase }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">📈</div>
+                    <div class="info-label">Demanda Laboral</div>
+                    <div class="info-value">{{ carreraDetalle.demanda_laboral | titlecase }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">💰</div>
+                    <div class="info-label">Salario Promedio</div>
+                    <div class="info-value">S/ {{ carreraDetalle.salario_promedio | number:'1.0-0' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🏠</div>
+                    <div class="info-label">Trabajo Remoto</div>
+                    <div class="info-value">{{ carreraDetalle.trabajo_remoto ? 'Disponible' : 'Presencial' }}</div>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="section">
+                <h2 class="section-title">Descripción de la carrera</h2>
+                <p class="section-text">{{ carreraDetalle.descripcion_corta }}</p>
+            </div>
+
+            <!-- Facultad -->
+            <div class="section">
+                <h2 class="section-title">Facultad</h2>
+                <div class="facultad-card">
+                    <h3>{{ carreraDetalle.faculty.nombre }}</h3>
+                    <p>{{ carreraDetalle.faculty.descripcion }}</p>
+                </div>
+            </div>
+
+            <!-- Trabajo remoto -->
+            <div class="section">
+                <h2 class="section-title">Modalidad de trabajo</h2>
+                <div class="remoto-badge" [class.remoto]="carreraDetalle.trabajo_remoto"
+                    [class.presencial]="!carreraDetalle.trabajo_remoto">
+                    {{ carreraDetalle.trabajo_remoto ? '🌍 Trabajo remoto disponible' : '🏢 Trabajo presencial' }}
+                </div>
+            </div>
+
+        </ng-container>
+
+        <!-- Error -->
+        <ng-container *ngIf="!cargando && error">
+            <div class="error-section">
+                <div class="error-icon">⚠️</div>
+                <h2>No se pudo cargar la información</h2>
+                <p>{{ error }}</p>
+                <button class="retry-btn" (click)="cargarCarrera()">
+                    Intentar nuevamente
+                </button>
+            </div>
+        </ng-container>
+
+    </div>
+</div>

@@ -1,0 +1,113 @@
+<div class="auth-container">
+    <div class="auth-card">
+
+        <!-- Logo / Título -->
+        <div class="auth-header">
+            <div class="logo-icon">🎯</div>
+            <h1>Orienta tu Futuro</h1>
+            <p>Descubre la carrera ideal para ti</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button class="tab-btn" [class.active]="!isRegistro" (click)="toggleModo()">
+                Iniciar Sesión
+            </button>
+            <button class="tab-btn" [class.active]="isRegistro" (click)="toggleModo()">
+                Registrarse
+            </button>
+        </div>
+
+        <!-- Formulario Login -->
+        <form *ngIf="!isRegistro" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" formControlName="email" class="form-input" placeholder="correo@ejemplo.com"
+                    [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
+                <span class="error-msg" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                    Ingresa un correo válido
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password" formControlName="password" class="form-input" placeholder="••••••••"
+                    [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+                <span class="error-msg"
+                    *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                    La contraseña es requerida
+                </span>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || cargando">
+                <span *ngIf="!cargando">Iniciar Sesión</span>
+                <span *ngIf="cargando" class="btn-loading">
+                    <span class="spinner-small"></span> Ingresando...
+                </span>
+            </button>
+        </form>
+
+        <!-- Formulario Registro -->
+        <form *ngIf="isRegistro" [formGroup]="registroForm" (ngSubmit)="onRegistro()" class="auth-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Nombres</label>
+                    <input type="text" formControlName="nombres" class="form-input" placeholder="Carlos"
+                        [class.error]="registroForm.get('nombres')?.invalid && registroForm.get('nombres')?.touched" />
+                    <span class="error-msg"
+                        *ngIf="registroForm.get('nombres')?.invalid && registroForm.get('nombres')?.touched">
+                        Ingresa tu nombre
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Apellidos</label>
+                    <input type="text" formControlName="apellidos" class="form-input" placeholder="Quispe"
+                        [class.error]="registroForm.get('apellidos')?.invalid && registroForm.get('apellidos')?.touched" />
+                    <span class="error-msg"
+                        *ngIf="registroForm.get('apellidos')?.invalid && registroForm.get('apellidos')?.touched">
+                        Ingresa tus apellidos
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" formControlName="email" class="form-input" placeholder="correo@ejemplo.com"
+                    [class.error]="registroForm.get('email')?.invalid && registroForm.get('email')?.touched" />
+                <span class="error-msg"
+                    *ngIf="registroForm.get('email')?.invalid && registroForm.get('email')?.touched">
+                    Ingresa un correo válido
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password" formControlName="password" class="form-input" placeholder="Mínimo 6 caracteres"
+                    [class.error]="registroForm.get('password')?.invalid && registroForm.get('password')?.touched" />
+                <span class="error-msg"
+                    *ngIf="registroForm.get('password')?.invalid && registroForm.get('password')?.touched">
+                    Mínimo 6 caracteres
+                </span>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="registroForm.invalid || cargando">
+                <span *ngIf="!cargando">Crear Cuenta</span>
+                <span *ngIf="cargando" class="btn-loading">
+                    <span class="spinner-small"></span> Registrando...
+                </span>
+            </button>
+        </form>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="mensajeError" class="auth-error">
+            ⚠️ {{ mensajeError }}
+        </div>
+
+        <!-- Mensaje de éxito -->
+        <div *ngIf="mensajeExito" class="auth-success">
+            ✅ {{ mensajeExito }}
+        </div>
+
+    </div>
+</div>

@@ -1,7 +1,8 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, NgZone, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { VocationalTestService, TestResult,  TestResponse, CarreraRecomendada } from '../service/vocational-test.service';
+import { VocationalTestService, TestResult, TestResponse, CarreraRecomendada } from '../service/vocational-test.service';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-vocational-test',
@@ -15,6 +16,7 @@ export class VocationalTest implements OnInit {
   testForm!: FormGroup;
   isSubmitting = false;
   testResult: TestResponse | null = null;
+  private readonly STORAGE_KEY = 'vocational-test-result';
 
   escalaInterpretacion: { [key: number]: string } = {
     1: 'Totalmente en desacuerdo',
@@ -87,11 +89,26 @@ export class VocationalTest implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private testService: VocationalTestService
+    private testService: VocationalTestService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
     this.buildForm();
+    this.loadSavedResult();
+  }
+
+  private loadSavedResult(): void {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      try {
+        this.testResult = JSON.parse(saved);
+      } catch (e) {
+        console.error('Error al leer resultado guardado:', e);
+        localStorage.removeItem(this.STORAGE_KEY);
+      }
+    }
   }
 
   buildForm(): void {
@@ -135,30 +152,50 @@ export class VocationalTest implements OnInit {
     };
 
     this.testService.sendResults(payload).subscribe({
-      next: (response: TestResponse) => {
-        this.testResult = response;
+      next: (response: any) => {
+        if (response.carreras_adicionales) {
+          response.carreras_recomendadas = [
+            ...response.carreras_recomendadas,
+            ...response.carreras_adicionales
+          ];
+          delete response.carreras_adicionales;
+        }
+
+        const result: TestResponse = {
+          perfil_general: response.perfil_general,
+          carreras_recomendadas: response.carreras_recomendadas?.slice(0, 3),
+          recomendacion_final: response.recomendacion_final
+        };
+
+        this.testResult = result;
         this.isSubmitting = false;
 
-        // Scroll al top para ver resultados
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(result));
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al enviar:', err);
         this.isSubmitting = false;
-        alert('Hubo un error al procesar tus respuestas. Intenta nuevamente.');
+        this.cdr.detectChanges();
       }
     });
   }
 
   onCarreraClick(carrera: CarreraRecomendada): void {
-    this.carreraSeleccionada.emit(carrera);
-    // Aquí puedes navegar al componente de detalle
-    console.log('Carrera seleccionada:', carrera);
+    this.router.navigate(['/carrera-detalle'], {
+      queryParams: { carrera: carrera.nombre }
+    });
   }
 
   resetTest(): void {
     this.testResult = null;
     this.testForm.reset();
+
+    localStorage.removeItem(this.STORAGE_KEY);
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.cdr.detectChanges();
   }
 }

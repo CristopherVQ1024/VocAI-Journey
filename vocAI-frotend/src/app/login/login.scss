@@ -1,0 +1,237 @@
+$primary: #6366f1;
+$secondary: #06b6d4;
+$dark: #1e293b;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-700: #374151;
+$error: #ef4444;
+$success: #10b981;
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e293b 0%, #6366f1 50%, #06b6d4 100%);
+    padding: 1.5rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Header
+.auth-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    .logo-icon {
+        font-size: 3.5rem;
+        margin-bottom: 0.5rem;
+        animation: bounce 2s infinite;
+    }
+
+    h1 {
+        color: $dark;
+        font-size: 1.75rem;
+        margin: 0 0 0.5rem;
+        font-weight: 700;
+    }
+
+    p {
+        color: #6b7280;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+// Tabs
+.auth-tabs {
+    display: flex;
+    background: $gray-100;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
+
+    .tab-btn {
+        flex: 1;
+        padding: 0.7rem;
+        border: none;
+        background: transparent;
+        color: #6b7280;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &:hover {
+            color: $dark;
+        }
+
+        &.active {
+            background: white;
+            color: $primary;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+    }
+}
+
+// Formulario
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-row {
+    display: grid;    
+    gap: 0.75rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $gray-700;
+}
+
+.form-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid $gray-200;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: $dark;
+    transition: all 0.3s;
+    outline: none;
+    background: $gray-100;
+
+    &::placeholder {
+        color: #9ca3af;
+    }
+
+    &:focus {
+        border-color: $primary;
+        background: white;
+        box-shadow: 0 0 0 4px rgba($primary, 0.1);
+    }
+
+    &.error {
+        border-color: $error;
+        background: #fef2f2;
+    }
+}
+
+.error-msg {
+    font-size: 0.8rem;
+    color: $error;
+}
+
+// Botón
+.submit-btn {
+    background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba($primary, 0.4);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}
+
+.spinner-small {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// Mensajes
+.auth-error {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    color: $error;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    border: 1px solid #fecaca;
+}
+
+.auth-success {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #f0fdf4;
+    color: $success;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    border: 1px solid #bbf7d0;
+}

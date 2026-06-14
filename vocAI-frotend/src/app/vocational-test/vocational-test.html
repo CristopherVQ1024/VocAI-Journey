@@ -1,6 +1,6 @@
 <div class="test-container">
   <!-- Formulario del test -->
-  <ng-container *ngIf="!testResult && !isSubmitting">
+  <ng-container *ngIf="!isSubmitting && !testResult">
     <h1>Test de Orientación Vocacional</h1>
     <p class="subtitle">
       Responde con sinceridad. No hay respuestas correctas o incorrectas.
@@ -39,10 +39,7 @@
 
       <div class="form-actions">
         <button type="submit" class="submit-btn" [disabled]="!testForm.valid || isSubmitting">
-          <span *ngIf="!isSubmitting">Enviar respuestas</span>
-          <span *ngIf="isSubmitting">
-            <span class="spinner"></span> Analizando respuestas...
-          </span>
+          Enviar respuestas
         </button>
       </div>
     </form>
