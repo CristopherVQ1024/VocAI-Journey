@@ -1,0 +1,135 @@
+<div class="test-container">
+  <!-- Formulario del test -->
+  <ng-container *ngIf="!testResult && !isSubmitting">
+    <h1>Test de Orientación Vocacional</h1>
+    <p class="subtitle">
+      Responde con sinceridad. No hay respuestas correctas o incorrectas.
+    </p>
+
+    <div class="legend">
+      <span class="legend-item"><strong>1</strong> Totalmente en desacuerdo</span>
+      <span class="legend-item"><strong>2</strong> En desacuerdo</span>
+      <span class="legend-item"><strong>3</strong> Neutral</span>
+      <span class="legend-item"><strong>4</strong> De acuerdo</span>
+      <span class="legend-item"><strong>5</strong> Totalmente de acuerdo</span>
+    </div>
+
+    <form [formGroup]="testForm" (ngSubmit)="onSubmit()">
+      <div class="questions-grid">
+        <div *ngFor="let question of questions; let i = index" class="question-card">
+          <div class="question-header">
+            <span class="question-number">{{ i + 1 }}</span>
+            <p class="question-text">{{ question }}</p>
+          </div>
+
+          <div class="options-row">
+            <label *ngFor="let option of options; let j = index" class="option-label"
+              [class.selected]="testForm.get('q' + i)?.value === option.value">
+              <input type="radio" [formControlName]="'q' + i" [value]="option.value" class="option-radio" />
+              <span class="option-number">{{ option.value }}</span>
+              <span class="option-text">{{ option.shortLabel }}</span>
+            </label>
+          </div>
+
+          <div *ngIf="testForm.get('q' + i)?.invalid && testForm.get('q' + i)?.touched" class="error-message">
+            Por favor selecciona una opción
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" [disabled]="!testForm.valid || isSubmitting">
+          <span *ngIf="!isSubmitting">Enviar respuestas</span>
+          <span *ngIf="isSubmitting">
+            <span class="spinner"></span> Analizando respuestas...
+          </span>
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <!-- Pantalla de carga -->
+  <ng-container *ngIf="isSubmitting && !testResult">
+    <div class="loading-container">
+      <h1>Analizando tus respuestas</h1>
+      <div class="spinner-large"></div>
+      <p>La IA está procesando tu perfil vocacional...</p>
+    </div>
+  </ng-container>
+
+  <!-- Resultados del test -->
+  <ng-container *ngIf="testResult">
+    <div class="results-container">
+      <h1>Tus Resultados Vocacionales</h1>
+
+      <div class="perfil-card">
+        <h2>Perfil Detectado</h2>
+        <p class="perfil-descripcion">{{ testResult.perfil_general.descripcion }}</p>
+
+        <div class="perfil-details">
+          <div class="fortalezas">
+            <h3>Fortalezas</h3>
+            <ul>
+              <li *ngFor="let fortaleza of testResult.perfil_general.fortalezas">
+                {{ fortaleza }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="areas">
+            <h3>Áreas Predominantes</h3>
+            <div class="areas-tags">
+              <span *ngFor="let area of testResult.perfil_general.areas_predominantes" class="area-tag">
+                {{ area }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="carreras-title">Carreras Recomendadas</h2>
+      <div class="carreras-grid">
+        <div *ngFor="let carrera of testResult.carreras_recomendadas; let i = index" class="carrera-card"
+          (click)="onCarreraClick(carrera)" [class.top-match]="i === 0">
+          <div class="carrera-badge" *ngIf="i === 0">Mejor match</div>
+
+          <div class="carrera-header">
+            <h3 class="carrera-nombre">{{ carrera.nombre }}</h3>
+            <div class="carrera-categoria">{{ carrera.categoria }}</div>
+          </div>
+
+          <div class="afinidad-container">
+            <div class="afinidad-circle">
+              <svg viewBox="0 0 36 36" class="afinidad-svg">
+                <path class="afinidad-bg" d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="afinidad-fill" [attr.stroke-dasharray]="carrera.afinidad + ', 100'" d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <text x="18" y="20.35" class="afinidad-text">{{ carrera.afinidad }}%</text>
+              </svg>
+            </div>
+          </div>
+
+          <p class="carrera-motivo">{{ carrera.motivo }}</p>
+
+          <button class="explorar-btn" (click)="onCarreraClick(carrera); $event.stopPropagation()">
+            Explorar carrera
+          </button>
+        </div>
+      </div>
+
+      <div class="recomendacion-final">
+        <h3>Conclusión</h3>
+        <p>{{ testResult.recomendacion_final }}</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="retry-btn" (click)="resetTest()">
+          Volver a hacer el test
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

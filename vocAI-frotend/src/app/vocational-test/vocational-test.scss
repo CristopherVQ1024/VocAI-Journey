@@ -1,0 +1,496 @@
+$primary: #2563eb;
+$primary-light: #dbeafe;
+$secondary: #7c3aed;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-700: #374151;
+$error: #dc2626;
+$success: #16a34a;
+$warning: #f59e0b;
+
+// Estilos base del contenedor
+.test-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    text-align: center;
+    color: $gray-700;
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 1rem;
+  background: $gray-100;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+
+  .legend-item {
+    font-size: 0.85rem;
+    color: $gray-700;
+
+    strong {
+      color: $primary;
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Estilos del formulario
+.questions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-200;
+    border-radius: 3px;
+  }
+}
+
+.question-card {
+  background: $gray-100;
+  border-radius: 10px;
+  padding: 1.25rem;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $primary-light;
+  }
+
+  .question-header {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .question-number {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: $primary;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .question-text {
+    margin: 0;
+    color: $gray-700;
+    line-height: 1.5;
+  }
+}
+
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid $gray-200;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+
+  &.selected {
+    border-color: $primary;
+    background: $primary-light;
+
+    .option-number {
+      background: $primary;
+      color: white;
+    }
+  }
+
+  &:hover {
+    border-color: $primary;
+  }
+
+  .option-radio {
+    display: none;
+  }
+
+  .option-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: $gray-200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .option-text {
+    font-size: 0.8rem;
+    color: $gray-700;
+  }
+}
+
+.error-message {
+  color: $error;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  text-align: center;
+}
+
+.submit-btn {
+  background: $primary;
+  color: white;
+  border: none;
+  padding: 0.85rem 2.5rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: darken($primary, 8%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Estilos de resultados
+.results-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Perfil card
+.perfil-card {
+  background: linear-gradient(135deg, #1e293b 0%, #6366f1 50%, #06b6d4 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+  }
+
+  .perfil-descripcion {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    opacity: 0.95;
+  }
+
+  .perfil-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fortalezas {
+    h3 {
+      font-size: 1rem;
+      margin: 0 0 0.75rem 0;
+      opacity: 0.9;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: 0.25rem 0;
+        &::before {
+          content: '▸ ';
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+
+  .areas {
+    h3 {
+      font-size: 1rem;
+      margin: 0 0 0.75rem 0;
+      opacity: 0.9;
+    }
+
+    .areas-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .area-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// Título de carreras
+.carreras-title {
+  text-align: center;
+  margin: 2rem 0 1.5rem;
+  color: $gray-700;
+}
+
+// Grid de carreras
+.carreras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+// Card de carrera
+.carrera-card {
+  background: white;
+  border: 2px solid $gray-200;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    border-color: $primary;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+  }
+
+  &.top-match {
+    border-color: $warning;
+    background: linear-gradient(to bottom, #fffbeb, white);
+  }
+
+  .carrera-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: $warning;
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .carrera-header {
+    margin-bottom: 1rem;
+    text-align: center;
+
+    .carrera-nombre {
+      margin: 0 0 0.5rem 0;
+      color: $gray-700;
+      font-size: 1.1rem;
+    }
+
+    .carrera-categoria {
+      display: inline-block;
+      background: $primary-light;
+      color: $primary;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+  }
+
+  .afinidad-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .afinidad-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .afinidad-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .afinidad-bg {
+    fill: none;
+    stroke: $gray-200;
+    stroke-width: 3.8;
+  }
+
+  .afinidad-fill {
+    fill: none;
+    stroke: $success;
+    stroke-width: 3.8;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease-out;
+  }
+
+  .afinidad-text {
+    fill: $gray-700;
+    font-size: 0.5rem;
+    font-weight: bold;
+    transform: rotate(90deg);
+    transform-origin: center;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .carrera-motivo {
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    flex-grow: 1;
+    margin-bottom: 1rem;
+  }
+
+  .explorar-btn {
+    background: transparent;
+    color: $primary;
+    border: 2px solid $primary;
+    padding: 0.6rem 1.5rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+
+    &:hover {
+      background: $primary;
+      color: white;
+    }
+  }
+}
+
+// Recomendación final
+.recomendacion-final {
+  background: $gray-100;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid $primary;
+
+  h3 {
+    margin: 0 0 0.75rem 0;
+    color: $gray-700;
+  }
+
+  p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+// Botón de reintentar
+.retry-btn {
+  background: white;
+  color: $primary;
+  border: 2px solid $primary;
+  padding: 0.85rem 2.5rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $primary-light;
+  }
+}
+
+.loading-container {
+  text-align: center;
+  padding: 3rem 1rem;
+  
+  h1 {
+    margin-bottom: 2rem;
+  }
+  
+  p {
+    color: #6b7280;
+    margin-top: 1.5rem;
+  }
+}
+
+.spinner-large {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  border: 5px solid $gray-200;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
