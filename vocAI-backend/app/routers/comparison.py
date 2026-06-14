@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from uuid import UUID
+from app.services.comparison_service import ComparisonSectionService
 
 from app.core.database import get_db
 from app.models.session import (
@@ -17,11 +19,25 @@ from app.schemas.session import (
     SelectCareersInput,
     SectionAnswerInput,
     SectionAnswerResponse,
+    
 )
-from app.schemas.comparison import ComparisonStepResponse, ComparisonSectionResponse, CareerCardResponse
+from app.schemas.comparison import ComparisonStepResponse, ComparisonSectionResponse, CareerCardResponse, ComparisonSectionAdminResponse, ComparisonSectionCreate, ComparisonSectionUpdate, CareerCardAdminResponse, CareerCardCreate, CareerCardUpdate
 
 router = APIRouter()
 
+
+@router.get(
+    "/sections",
+    response_model=list[ComparisonSectionAdminResponse]
+)
+async def get_sections(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Lista todas las secciones de comparación.
+    Ordenadas según el flujo del journey.
+    """
+    return await ComparisonSectionService.get_all(db)
 
 @router.post("/session", response_model=SessionResponse, status_code=201)
 async def create_session(
@@ -163,3 +179,332 @@ async def submit_answer(
     db.add(answer)
     await db.flush()
     return answer
+
+@router.get(
+    "/sections/{section_id}",
+    response_model=ComparisonSectionAdminResponse
+)
+async def get_section(
+    section_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Obtiene una sección específica.
+    """
+    section = await ComparisonSectionService.get_by_id(
+        db,
+        section_id
+    )
+
+    if not section:
+        raise HTTPException(
+            status_code=404,
+            detail="Sección no encontrada"
+        )
+
+    return section
+
+@router.post(
+    "/sections",
+    response_model=ComparisonSectionAdminResponse,
+    status_code=201
+)
+async def create_section(
+    data: ComparisonSectionCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Crea una sección del journey.
+    """
+
+    existing_slug = await ComparisonSectionService.get_by_slug(
+        db,
+        data.slug
+    )
+
+    if existing_slug:
+        raise HTTPException(
+            status_code=400,
+            detail="El slug ya existe"
+        )
+
+    section = ComparisonSection(
+        nombre=data.nombre,
+        slug=data.slug,
+        descripcion=data.descripcion,
+        orden=data.orden,
+        activo=data.activo,
+    )
+
+    db.add(section)
+
+    await db.flush()
+
+    return section
+
+
+@router.put(
+    "/sections/{section_id}",
+    response_model=ComparisonSectionAdminResponse
+)
+async def update_section(
+    section_id: UUID,
+    data: ComparisonSectionUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Edita una sección del journey.
+    """
+
+    section = await ComparisonSectionService.get_by_id(
+        db,
+        section_id
+    )
+
+    if not section:
+        raise HTTPException(
+            status_code=404,
+            detail="Sección no encontrada"
+        )
+
+    update_data = data.model_dump(exclude_unset=True)
+
+    # validar slug único
+    if "slug" in update_data:
+        existing_slug = await ComparisonSectionService.get_by_slug(
+            db,
+            update_data["slug"]
+        )
+
+        if existing_slug and existing_slug.id != section.id:
+            raise HTTPException(
+                status_code=400,
+                detail="El slug ya existe"
+            )
+
+    for key, value in update_data.items():
+        setattr(section, key, value)
+
+    await db.flush()
+
+    return section
+
+@router.patch(
+    "/sections/{section_id}/toggle",
+    response_model=ComparisonSectionAdminResponse
+)
+async def toggle_section(
+    section_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Activa o desactiva una sección.
+    """
+    section = await ComparisonSectionService.get_by_id(
+        db,
+        section_id
+    )
+
+    if not section:
+        raise HTTPException(
+            status_code=404,
+            detail="Sección no encontrada"
+        )
+
+    section.activo = not section.activo
+
+    await db.flush()
+
+    return section
+
+
+@router.get(
+    "/cards",
+    response_model=list[CareerCardAdminResponse]
+)
+async def get_cards(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Lista todas las cards de carreras.
+    Admin panel.
+    """
+    return await ComparisonSectionService.get_all_cards(db)
+
+@router.get(
+    "/cards/{card_id}",
+    response_model=CareerCardAdminResponse
+)
+async def get_card(
+    card_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Obtiene una card específica.
+    """
+    card = await ComparisonSectionService.get_card_by_id(
+        db,
+        card_id
+    )
+
+    if not card:
+        raise HTTPException(
+            status_code=404,
+            detail="Card no encontrada"
+        )
+
+    return card
+
+
+@router.post(
+    "/cards",
+    response_model=CareerCardAdminResponse,
+    status_code=201
+)
+async def create_card(
+    data: CareerCardCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Crea una card markdown de carrera.
+    """
+
+    # validar carrera
+    career_result = await db.execute(
+        select(Career)
+        .where(Career.id == data.career_id)
+    )
+    career = career_result.scalar_one_or_none()
+
+    if not career:
+        raise HTTPException(
+            status_code=404,
+            detail="Carrera no encontrada"
+        )
+
+    # validar sección
+    section_result = await db.execute(
+        select(ComparisonSection)
+        .where(ComparisonSection.id == data.section_id)
+    )
+    section = section_result.scalar_one_or_none()
+
+    if not section:
+        raise HTTPException(
+            status_code=404,
+            detail="Sección no encontrada"
+        )
+
+    # evitar duplicado
+    existing = await ComparisonSectionService.get_card_by_career_and_section(
+        db,
+        data.career_id,
+        data.section_id
+    )
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe una card para esta carrera y sección"
+        )
+
+    card = CareerCard(
+        career_id=data.career_id,
+        section_id=data.section_id,
+        markdown_content=data.markdown_content,
+        orden=data.orden,
+        is_active=data.is_active,
+    )
+
+    db.add(card)
+
+    await db.flush()
+
+    return card
+
+
+@router.put(
+    "/cards/{card_id}",
+    response_model=CareerCardAdminResponse
+)
+async def update_card(
+    card_id: UUID,
+    data: CareerCardUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Edita una card markdown.
+    """
+
+    card = await ComparisonSectionService.get_card_by_id(
+        db,
+        card_id
+    )
+
+    if not card:
+        raise HTTPException(
+            status_code=404,
+            detail="Card no encontrada"
+        )
+
+    update_data = data.model_dump(exclude_unset=True)
+
+    # validar duplicado career + section
+    future_career_id = update_data.get(
+        "career_id",
+        card.career_id
+    )
+
+    future_section_id = update_data.get(
+        "section_id",
+        card.section_id
+    )
+
+    existing = await ComparisonSectionService.get_card_by_career_and_section(
+        db,
+        future_career_id,
+        future_section_id
+    )
+
+    if existing and existing.id != card.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe una card para esta carrera y sección"
+        )
+
+    for key, value in update_data.items():
+        setattr(card, key, value)
+
+    await db.flush()
+
+    return card
+
+
+@router.patch(
+    "/cards/{card_id}/toggle",
+    response_model=CareerCardAdminResponse
+)
+async def toggle_card(
+    card_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Activa o desactiva una card.
+    """
+
+    card = await ComparisonSectionService.get_card_by_id(
+        db,
+        card_id
+    )
+
+    if not card:
+        raise HTTPException(
+            status_code=404,
+            detail="Card no encontrada"
+        )
+
+    card.is_active = not card.is_active
+
+    await db.flush()
+
+    return card
