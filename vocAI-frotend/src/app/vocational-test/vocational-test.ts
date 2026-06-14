@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, NgZone, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VocationalTestService, TestResult, TestResponse, CarreraRecomendada } from '../service/vocational-test.service';
+import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -17,6 +18,8 @@ export class VocationalTest implements OnInit {
   isSubmitting = false;
   testResult: TestResponse | null = null;
   private readonly STORAGE_KEY = 'vocational-test-result';
+  isComparing = false;
+
 
   escalaInterpretacion: { [key: number]: string } = {
     1: 'Totalmente en desacuerdo',
@@ -197,5 +200,78 @@ export class VocationalTest implements OnInit {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
     this.cdr.detectChanges();
+  }
+
+  iniciarComparacion(): void {
+    if (!this.testResult?.carreras_recomendadas?.length) return;
+
+    this.isComparing = true;
+    this.cdr.detectChanges();
+
+    // Paso 1: Crear sesión
+    this.testService.crearSesionComparacion({ nombre: 'Mi comparación vocacional' }).subscribe({
+      next: (session) => {
+        console.log('Sesión creada:', session.id);
+
+        // Paso 2: Obtener IDs de las 3 carreras
+        const nombresCarreras = this.testResult!.carreras_recomendadas.map(c => c.nombre);
+        const llamadasCarreras = nombresCarreras.map(nombre =>
+          this.testService.getCarreraDetalle(nombre)
+        );
+
+        forkJoin(llamadasCarreras).subscribe({
+          next: (resultados: any[]) => {
+            const career_ids: string[] = [];
+            const compatibility_scores: { [key: string]: number } = {};
+
+            resultados.forEach((res, index) => {
+              const carrera = Array.isArray(res) ? res[0] : res;
+              if (carrera?.id) {
+                career_ids.push(carrera.id);
+                compatibility_scores[carrera.id] = this.testResult!.carreras_recomendadas[index].afinidad;
+              }
+            });
+
+            if (career_ids.length === 0) {
+              this.isComparing = false;
+              this.cdr.detectChanges();
+              alert('No se encontraron IDs para las carreras');
+              return;
+            }
+
+            // Paso 3: Enviar carreras a la sesión
+            this.testService.agregarCarrerasASesion(session.id, {
+              career_ids,
+              compatibility_scores
+            }).subscribe({
+              next: (response) => {
+                console.log('Comparación lista:', response);
+                this.isComparing = false;
+                this.cdr.detectChanges();
+
+                this.router.navigate(['/career-card'], {
+                  queryParams: { session_id: response.session_id }
+                });
+              },
+              error: (err) => {
+                console.error('Error al agregar carreras:', err);
+                this.isComparing = false;
+                this.cdr.detectChanges();
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Error al obtener carreras:', err);
+            this.isComparing = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error al crear sesión:', err);
+        this.isComparing = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

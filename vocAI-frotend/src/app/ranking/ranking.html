@@ -1,0 +1,113 @@
+<div class="ranking-container">
+    <!-- Header -->
+    <div class="ranking-header">
+        <button class="back-btn" (click)="volver()">
+            <span class="back-icon">←</span>
+            Volver
+        </button>
+        <h1>🏆 Ranking de Carreras</h1>
+        <p>Resultados basados en tu comparación vocacional</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="ranking-content">
+
+        <!-- Cargando -->
+        <ng-container *ngIf="cargando">
+            <div class="loading-section">
+                <div class="spinner-large"></div>
+                <p>Cargando resultados...</p>
+            </div>
+        </ng-container>
+
+        <!-- Ranking -->
+        <ng-container *ngIf="!cargando && ranking">
+
+            <!-- Podio Top 3 -->
+            <div class="podio">
+                <!-- 2do lugar -->
+                <div class="podio-item segundo" *ngIf="ranking.results[1]">
+                    <div class="podio-medal">🥈</div>
+                    <div class="podio-name">{{ ranking.results[1].career.nombre }}</div>
+                    <div class="podio-score">{{ ranking.results[1].final_score }}%</div>
+                    <div class="podio-bar" [style.height.%]="ranking.results[1].final_score"></div>
+                </div>
+
+                <!-- 1er lugar -->
+                <div class="podio-item primero" *ngIf="ranking.results[0]">
+                    <div class="podio-crown">👑</div>
+                    <div class="podio-medal">🥇</div>
+                    <div class="podio-name">{{ ranking.results[0].career.nombre }}</div>
+                    <div class="podio-score">{{ ranking.results[0].final_score }}%</div>
+                    <div class="podio-bar" [style.height.%]="ranking.results[0].final_score"></div>
+                </div>
+
+                <!-- 3er lugar -->
+                <div class="podio-item tercero" *ngIf="ranking.results[2]">
+                    <div class="podio-medal">🥉</div>
+                    <div class="podio-name">{{ ranking.results[2].career.nombre }}</div>
+                    <div class="podio-score">{{ ranking.results[2].final_score }}%</div>
+                    <div class="podio-bar" [style.height.%]="ranking.results[2].final_score"></div>
+                </div>
+            </div>
+
+            <!-- Detalle de resultados -->
+            <div class="resultados-detalle">
+                <div *ngFor="let item of ranking.results" class="resultado-card"
+                    [class.winner]="item.ranking_position === 1" (click)="verDetalle(item)">
+                    <div class="resultado-header">
+                        <span class="posicion">#{{ item.ranking_position }}</span>
+                        <h3>{{ item.career.nombre }}</h3>
+                        <span class="final-score">{{ item.final_score }}%</span>
+                    </div>
+
+                    <div class="scores-grid">
+                        <div class="score-item">
+                            <span class="score-label">Afinidad</span>
+                            <div class="score-bar">
+                                <div class="score-fill afinidad" [style.width.%]="item.compatibility_score"></div>
+                            </div>
+                            <span class="score-value">{{ item.compatibility_score }}%</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">Interacción</span>
+                            <div class="score-bar">
+                                <div class="score-fill interaccion" [style.width.%]="item.interaction_score"></div>
+                            </div>
+                            <span class="score-value">{{ item.interaction_score }}%</span>
+                        </div>
+                    </div>
+
+                    <div class="ai-justification" *ngIf="item.ai_justification">
+                        <span class="ai-icon">🤖</span>
+                        <p>{{ item.ai_justification }}</p>
+                    </div>
+
+                    <div class="career-info">
+                        <span class="info-tag">{{ item.career.modalidad | titlecase }}</span>
+                        <span class="info-tag">{{ item.career.demanda_laboral | titlecase }} demanda</span>
+                        <span class="info-tag">S/ {{ item.career.salario_promedio | number:'1.0-0' }}</span>
+                    </div>
+
+                    <button class="detalle-btn" (click)="verDetalle(item); $event.stopPropagation()">
+                        Ver detalle de la carrera
+                    </button>
+                </div>
+            </div>
+
+        </ng-container>
+
+        <!-- Error -->
+        <ng-container *ngIf="!cargando && error">
+            <div class="error-section">
+                <div class="error-icon">⚠️</div>
+                <h2>No se pudo cargar el ranking</h2>
+                <p>{{ error }}</p>
+                <button class="retry-btn" (click)="cargarRanking()">
+                    Intentar nuevamente
+                </button>
+            </div>
+        </ng-container>
+
+    </div>
+</div>

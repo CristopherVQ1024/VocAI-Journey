@@ -1,0 +1,87 @@
+<div class="comparison-container">
+    <!-- Header -->
+    <div class="comparison-header">
+        <div class="header-top">
+            <button class="back-btn" (click)="volver()">
+                <span class="back-icon">←</span>
+                Volver
+            </button>
+
+            <div class="step-indicator">
+                <span class="step-badge">Paso {{ currentStep }} de {{ totalSteps }}</span>
+            </div>
+        </div>
+
+        <h1 class="section-title">{{ sectionTitle }}</h1>
+        <p class="section-desc">{{ sectionDesc }}</p>
+
+        <!-- Progress bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+        </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="comparison-content">
+
+        <!-- Cargando -->
+        <ng-container *ngIf="cargando">
+            <div class="loading-section">
+                <div class="spinner-large"></div>
+                <p>Cargando comparación...</p>
+            </div>
+        </ng-container>
+
+        <!-- Cards de comparación -->
+        <ng-container *ngIf="!cargando && !completado">
+            <div class="cards-grid">
+                <div *ngFor="let card of cards; let i = index" class="comparison-card"
+                    [class.selected]="selectedCardId === card.career_id" (click)="seleccionarCard(card)">
+                    <div class="card-badge" *ngIf="i === 0">🌟</div>
+                    <div class="card-badge" *ngIf="i === 1">💡</div>
+                    <div class="card-badge" *ngIf="i === 2">🚀</div>
+
+                    <div class="card-content" [innerHTML]="card.markdown_content | markdown"></div>
+
+                    <button class="select-btn" [class.active]="selectedCardId === card.career_id"
+                        (click)="seleccionarCard(card); $event.stopPropagation()">
+                        {{ selectedCardId === card.career_id ? '✓ Seleccionada' : 'Elegir esta opción' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón continuar -->
+            <!-- Botón continuar / finalizar -->
+            <div class="actions">
+                <button class="continue-btn" [disabled]="!selectedCardId || guardando"
+                    (click)="currentStep === totalSteps ? finalizarComparacion() : guardarYContinuar()">
+                    <span *ngIf="!guardando">
+                        {{ currentStep === totalSteps ? '🏆 Finalizar y ver ranking' : 'Continuar al siguiente paso' }}
+                    </span>
+                    <span *ngIf="guardando" class="btn-loading">
+                        <span class="spinner-small"></span>
+                        {{ currentStep === totalSteps ? 'Generando ranking...' : 'Guardando...' }}
+                    </span>
+                </button>
+            </div>
+        </ng-container>
+
+        <!-- Completado -->
+        <ng-container *ngIf="completado">
+            <div class="completed-section">
+                <div class="completed-icon">🎉</div>
+                <h2>¡Comparación completada!</h2>
+                <p>Has completado todos los pasos de la comparación vocacional.</p>
+                <div class="completed-actions">
+                    <button class="results-btn" (click)="verResultados()">
+                        Ver resultados
+                    </button>
+                    <button class="retry-btn" (click)="reiniciarComparacion()">
+                        Volver a empezar
+                    </button>
+                </div>
+            </div>
+        </ng-container>
+
+    </div>
+</div>

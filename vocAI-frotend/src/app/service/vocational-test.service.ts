@@ -80,6 +80,82 @@ export interface AuthResponse {
   };
 }
 
+// Agrega estas interfaces
+export interface ComparisonSession {
+  id: string;
+  user_id: string | null;
+  guest_token: string | null;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface CreateSessionRequest {
+  nombre: string;
+}
+
+export interface AddCareersRequest {
+  career_ids: string[];
+  compatibility_scores: {
+    [key: string]: number;
+  };
+}
+
+export interface AddCareersResponse {
+  message: string;
+  session_id: string;
+}
+
+// Agrega estas interfaces
+export interface ComparisonStep {
+  section: {
+    id: string;
+    nombre: string;
+    slug: string;
+    descripcion: string;
+    orden: number;
+  };
+  cards: ComparisonCard[];
+  total_steps: number;
+  current_step: number;
+}
+
+export interface ComparisonCard {
+  id: string;
+  career_id: string;
+  section_id: string;
+  markdown_content: string;
+  orden: number;
+}
+
+export interface SaveAnswerRequest {
+  section_id: string;
+  selected_career_id: string;
+}
+
+export interface SaveAnswerResponse {
+  message: string;
+  session_id: string;
+}
+
+export interface RankingResult {
+  session_id: string;
+  results: RankingItem[];
+}
+
+export interface RankingItem {
+  ranking_position: number;
+  career: CarreraDetalle;
+  compatibility_score: number;
+  interaction_score: number;
+  final_score: number;
+  ai_justification: string | null;
+}
+
+export interface ChatbotResponse {
+  reply: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -87,6 +163,8 @@ export class VocationalTestService {
 
   // Webhook de n8n (no tocar)
   private webhookUrl = 'http://localhost:5678/webhook/test-vocacional';
+
+  private chatbotWebhookUrl = 'http://localhost:5678/webhook/chatbot-vocacional'; 
 
   // Backend principal
   private apiUrl = 'http://localhost:8000';
@@ -111,5 +189,39 @@ export class VocationalTestService {
   // Registro
   registro(data: RegistroRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/api/auth/register`, data);
+  }
+
+  // Crear sesión de comparación
+  crearSesionComparacion(data: CreateSessionRequest): Observable<ComparisonSession> {
+    return this.http.post<ComparisonSession>(`${this.apiUrl}/api/comparison/session`, data);
+  }
+
+  // Agregar carreras a la sesión
+  agregarCarrerasASesion(sessionId: string, data: AddCareersRequest): Observable<AddCareersResponse> {
+    return this.http.post<AddCareersResponse>(`${this.apiUrl}/api/comparison/session/${sessionId}/careers`, data);
+  }
+
+  // Obtener step de comparación
+  getComparisonStep(sessionId: string, step: number): Observable<ComparisonStep> {
+    return this.http.get<ComparisonStep>(`${this.apiUrl}/api/comparison/session/${sessionId}/step/${step}`);
+  }
+
+  // Guardar respuesta
+  saveAnswer(sessionId: string, data: SaveAnswerRequest): Observable<SaveAnswerResponse> {
+    return this.http.post<SaveAnswerResponse>(`${this.apiUrl}/api/comparison/session/${sessionId}/answer`, data);
+  }
+
+  // Generar ranking
+  generateRanking(sessionId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/ranking/generate/${sessionId}`, {});
+  }
+
+  // Obtener ranking
+  getRanking(sessionId: string): Observable<RankingResult> {
+    return this.http.get<RankingResult>(`${this.apiUrl}/api/ranking/${sessionId}`);
+  }
+
+  sendChatMessage(message: string): Observable<ChatbotResponse> {
+    return this.http.post<ChatbotResponse>(this.chatbotWebhookUrl, { message });
   }
 }
